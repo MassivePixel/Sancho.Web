@@ -9,11 +9,18 @@ export type Message = {
   };
 };
 
+export enum ConnectionStatus {
+  Disconnected,
+  Connected,
+}
+
 export class SanchoConnection {
   connection: signalR.HubConnection;
   id: string;
   isConnected: boolean;
-  listeners = new Map<string, ((m: Message) => any)[]>();
+
+  stateChangedListeners: ((status: ConnectionStatus) => void)[] = [];
+  messageListeners = new Map<string, ((m: Message) => any)[]>();
 
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
@@ -26,7 +33,10 @@ export class SanchoConnection {
 
   connect = () => {
     const t = this.connection.start();
-    t.then(() => (this.isConnected = true));
+    t.then(() => {
+      this.isConnected = true;
+      this.stateChangedListeners.forEach(f => f(ConnectionStatus.Connected));
+    });
     return t;
   };
 
@@ -46,18 +56,24 @@ export class SanchoConnection {
     });
   };
 
+  addStateChangedListener(callback: (status: ConnectionStatus) => void) {
+    this.stateChangedListeners.push(callback);
+  }
+
+  removeStateChangedListener(callback: (status: ConnectionStatus) => void) {}
+
   addListener = (pluginId: string, callback: (m: Message) => any) => {
-    if (!this.listeners.has(pluginId)) {
-      this.listeners.set(pluginId, []);
+    if (!this.messageListeners.has(pluginId)) {
+      this.messageListeners.set(pluginId, []);
     }
 
-    this.listeners.get(pluginId)!.push(callback);
+    this.messageListeners.get(pluginId)!.push(callback);
   };
 
   removeListener = (pluginId: string, callback: (m: Message) => any) => {};
 
   _handleReceive = (message: Message) => {
-    const listeners = this.listeners.get(message.metadata.pluginId);
+    const listeners = this.messageListeners.get(message.metadata.pluginId);
 
     if (listeners && listeners.length) {
       listeners.forEach(listener => listener(message));
