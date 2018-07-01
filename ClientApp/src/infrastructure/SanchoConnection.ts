@@ -1,13 +1,26 @@
 import * as signalR from '@aspnet/signalr';
 
-export class sanchoConnection {
+type Message = {
+  command: string;
+  data: null | object;
+  metadata: {
+    pluginId: string;
+    origin: 'server' | 'client';
+  };
+};
+
+export class SanchoConnection {
+  connection: signalR.HubConnection;
+  id: string;
+  isConnected: boolean;
+  listeners = new Map<string, ((m: Message) => any)[]>();
+
   constructor() {
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl('/protocol')
       .build();
     this.id = '1';
     this.isConnected = false;
-    this.listeners = new Map();
     this.connection.on('receive', this._handleReceive);
   }
 
@@ -19,8 +32,8 @@ export class sanchoConnection {
     return t;
   };
 
-  send = (pluginId, command, data = null) => {
-    this.connection.send('send', {
+  send = (pluginId: string, command: string, data: null | object = null) => {
+    this.connection.send('send', <Message>{
       command,
       data,
       metadata: {
@@ -31,15 +44,15 @@ export class sanchoConnection {
     });
   };
 
-  addListener = (pluginId, callback) => {
+  addListener = (pluginId: string, callback: (m: Message) => any) => {
     if (!this.listeners.has(pluginId)) {
       this.listeners.set(pluginId, []);
     }
 
-    this.listeners.get(pluginId).push(callback);
+    this.listeners.get(pluginId)!.push(callback);
   };
 
-  _handleReceive = message => {
+  _handleReceive = (message: Message) => {
     const listeners = this.listeners.get(message.metadata.pluginId);
 
     if (listeners && listeners.length) {

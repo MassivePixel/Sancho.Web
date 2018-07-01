@@ -1,9 +1,9 @@
 import React from 'react';
 import EchoPlugin from './plugins/echo';
-import { sanchoConnection } from '../infrastructure/sanchoConnection';
+import { SanchoConnection } from '../infrastructure/SanchoConnection';
 
 class Home extends React.Component {
-  connection = new sanchoConnection();
+  connection = new SanchoConnection();
 
   componentDidMount() {
     this.connect();

@@ -9,12 +9,23 @@
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4",
     "rimraf": "2.6.2",
-    "tslib": "1.9.2"
+    "tslib": "1.9.2",
+    "typescript": "^2.9.2"
   },
   "scripts": {
-    "start": "rimraf ./build && react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "start": "rimraf ./build && react-app-rewired start --scripts-version react-scripts-ts",
+    "build": "react-app-rewired build --scripts-version react-scripts-ts",
+    "test": "react-app-rewired test --scripts-version react-scripts-ts --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
+    "@types/react-router-dom": "^4.2.7",
+    "react-app-rewired": "^1.5.2",
+    "react-scripts-ts": "^2.16.0",
+    "tslint-config-airbnb": "^5.9.2",
+    "tslint-config-prettier": "^1.13.0",
+    "tslint-react": "^3.6.0"
   }
 }
