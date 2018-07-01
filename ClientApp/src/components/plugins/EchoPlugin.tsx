@@ -1,10 +1,20 @@
 import React from 'react';
+import {
+  SanchoConnection,
+  Message,
+} from '../../infrastructure/SanchoConnection';
 
-export default class EchoPlugin extends React.PureComponent {
-  state = {
-    text: '',
-    messages: [],
-  };
+type Props = {
+  connection: SanchoConnection;
+};
+
+class State {
+  text = '';
+  messages: string[] = [];
+}
+
+export default class EchoPlugin extends React.PureComponent<Props, State> {
+  state = new State();
 
   componentDidMount() {
     this.props.connection.addListener('test', this._handleReceive);
@@ -38,11 +48,11 @@ export default class EchoPlugin extends React.PureComponent {
     this.setState({ text: '' });
   };
 
-  _handleReceive = message => {
+  _handleReceive = (message: Message) => {
     this._log(`got message: ${message.command}: '${message.data}'`);
   };
 
-  _log = msg => {
+  _log = (msg: string) => {
     this.setState(s => ({
       messages: [msg, ...s.messages],
     }));

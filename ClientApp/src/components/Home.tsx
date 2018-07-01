@@ -1,5 +1,5 @@
 import React from 'react';
-import EchoPlugin from './plugins/echo';
+import EchoPlugin from './plugins/EchoPlugin';
 import { SanchoConnection } from '../infrastructure/SanchoConnection';
 
 class Home extends React.Component {

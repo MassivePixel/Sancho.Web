@@ -1,6 +1,6 @@
 import * as signalR from '@aspnet/signalr';
 
-type Message = {
+export type Message = {
   command: string;
   data: null | object;
   metadata: {
@@ -32,7 +32,11 @@ export class SanchoConnection {
     return t;
   };
 
-  send = (pluginId: string, command: string, data: null | object = null) => {
+  send = (
+    pluginId: string,
+    command: string,
+    data: null | object | string = null
+  ) => {
     this.connection.send('send', <Message>{
       command,
       data,
@@ -51,6 +55,8 @@ export class SanchoConnection {
 
     this.listeners.get(pluginId)!.push(callback);
   };
+
+  removeListener = (pluginId: string, callback: (m: Message) => any) => {};
 
   _handleReceive = (message: Message) => {
     const listeners = this.listeners.get(message.metadata.pluginId);
