@@ -1,5 +1,6 @@
 import React from 'react';
-import * as signalR from '@aspnet/signalr';
+import EchoPlugin from './plugins/echo';
+import { sanchoConnection } from '../infrastructure/sanchoConnection';
 
 class Home extends React.Component {
   state = {
@@ -7,36 +8,11 @@ class Home extends React.Component {
     messages: [],
   };
 
+  connection = new sanchoConnection();
+
   componentDidMount() {
-    this.connection = new signalR.HubConnectionBuilder()
-      .withUrl('/protocol')
-      .build();
-
-    this.connection.on('receive', message => {
-      this.prependMessage(`got message: ${message.command}: '${message.data}'`);
-    });
-
-    this.prependMessage('connecting...');
-
-    this.connection.start().then(() => {
-      this.prependMessage('connection started');
-      this.connection.send('send', {
-        command: 'server test!',
-        data: 'test!',
-        metadata: {
-          pluginId: 'test',
-          origin: 'server',
-          senderId: 0,
-        },
-      });
-    });
+    this.connect();
   }
-
-  prependMessage = msg => {
-    this.setState(s => ({
-      messages: [msg, ...s.messages],
-    }));
-  };
 
   render() {
     return (
@@ -53,21 +29,34 @@ class Home extends React.Component {
         </div>
 
         {this.state.messages.map((m, i) => <li key={i}>{m}</li>)}
+
+        <EchoPlugin connection={this.connection} />
       </div>
     );
   }
 
-  send = () => {
-    this.connection.send('send', {
-      command: 'chat',
-      data: this.state.text,
-      metadata: {
-        pluginId: 'test',
-        origin: 'server',
-        senderId: 0,
-      },
+  connect = () => {
+    this.connection.addListener('test', message => {
+      this.log(`got message: ${message.command}: '${message.data}'`);
     });
+
+    this.log('connecting...');
+
+    this.connection.connect().then(() => {
+      this.log('connection started');
+      this.connection.send('test', 'server test!', 'test!');
+    });
+  };
+
+  send = () => {
+    this.connection.send('test', 'chat', this.state.text);
     this.setState({ text: '' });
+  };
+
+  log = msg => {
+    this.setState(s => ({
+      messages: [msg, ...s.messages],
+    }));
   };
 }
 export default Home;
