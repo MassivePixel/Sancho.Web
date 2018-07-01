@@ -26,9 +26,7 @@ export class SanchoConnection {
 
   connect = () => {
     const t = this.connection.start();
-    t.then(() => {
-      this.isConnected = true;
-    });
+    t.then(() => (this.isConnected = true));
     return t;
   };
 

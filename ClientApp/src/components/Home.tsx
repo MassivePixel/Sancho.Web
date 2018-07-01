@@ -2,7 +2,12 @@ import React from 'react';
 import EchoPlugin from './plugins/EchoPlugin';
 import { SanchoConnection } from '../infrastructure/SanchoConnection';
 
-class Home extends React.Component {
+class State {
+  isConnected = false;
+}
+
+class Home extends React.Component<{}, State> {
+  state = new State();
   connection = new SanchoConnection();
 
   componentDidMount() {
@@ -10,10 +15,15 @@ class Home extends React.Component {
   }
 
   render() {
+    const { isConnected } = this.state;
     return (
       <div className="container">
         <nav>
           <h1>Sancho</h1>
+
+          <div className="status">
+            {isConnected ? 'Connected' : 'Connecting...'}
+          </div>
         </nav>
 
         <EchoPlugin connection={this.connection} />
@@ -24,6 +34,7 @@ class Home extends React.Component {
   connect = () => {
     this.connection.connect().then(() => {
       // connected
+      this.setState({ isConnected: true });
     });
   };
 }
