@@ -12,7 +12,9 @@ class Home extends React.Component {
   render() {
     return (
       <div className="container">
-        <h1>SignalR</h1>
+        <nav>
+          <h1>Sancho</h1>
+        </nav>
 
         <EchoPlugin connection={this.connection} />
       </div>
