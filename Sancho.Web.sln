@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sancho.Web", "Sancho.Web.csproj", "{ECC80D47-D4E5-4B7C-A9CC-312DFA153EF9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECC80D47-D4E5-4B7C-A9CC-312DFA153EF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECC80D47-D4E5-4B7C-A9CC-312DFA153EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECC80D47-D4E5-4B7C-A9CC-312DFA153EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECC80D47-D4E5-4B7C-A9CC-312DFA153EF9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

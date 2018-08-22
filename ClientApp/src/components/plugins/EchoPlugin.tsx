@@ -1,12 +1,10 @@
-import React from 'react';
-import {
-  SanchoConnection,
-  Message,
-  ConnectionStatus,
-} from '../../infrastructure/SanchoConnection';
+import React, { PureComponent } from 'react';
+
+import { SanchoConnection, withSancho, Message } from '../../infrastructure';
 
 type Props = {
   connection: SanchoConnection;
+  isEnabled: boolean;
 };
 
 class State {
@@ -15,21 +13,21 @@ class State {
   isEnabled = false;
 }
 
-export default class EchoPlugin extends React.PureComponent<Props, State> {
+class EchoPlugin extends PureComponent<Props, State> {
   state = new State();
 
   componentDidMount() {
-    this.props.connection.addListener('test', this._handleReceive);
-    this.props.connection.addStateChangedListener(this._handleStateChanged);
+    this.props.connection.addListener('echo', this.receive);
   }
 
   componentWillUnmount() {
-    this.props.connection.removeListener('test', this._handleReceive);
-    this.props.connection.removeStateChangedListener(this._handleStateChanged);
+    this.props.connection.removeListener('echo', this.receive);
   }
 
   render() {
-    const { text, isEnabled } = this.state;
+    const { text } = this.state;
+    const { isEnabled } = this.props;
+
     return (
       <div className="plugin">
         <h3>Echo</h3>
@@ -46,22 +44,20 @@ export default class EchoPlugin extends React.PureComponent<Props, State> {
           </button>
         </div>
 
-        {this.state.messages.map((m, i) => <li key={i}>{m}</li>)}
+        {this.state.messages.map((m, i) => (
+          <li key={i}>{m}</li>
+        ))}
       </div>
     );
   }
 
+  receive = (message: Message) => {
+    this._log(`Echo: ${message.command}: '${message.data}'`);
+  };
+
   send = () => {
-    this.props.connection.send('test', 'chat', this.state.text);
+    this.props.connection.send('echo', 'echo back', this.state.text);
     this.setState({ text: '' });
-  };
-
-  _handleReceive = (message: Message) => {
-    this._log(`got message: ${message.command}: '${message.data}'`);
-  };
-
-  _handleStateChanged = (status: ConnectionStatus) => {
-    this.setState({ isEnabled: status === ConnectionStatus.Connected });
   };
 
   _log = (msg: string) => {
@@ -70,3 +66,5 @@ export default class EchoPlugin extends React.PureComponent<Props, State> {
     }));
   };
 }
+
+export default withSancho(EchoPlugin);

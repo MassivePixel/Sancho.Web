@@ -7,6 +7,7 @@ namespace Sancho.Web
         public string pluginId { get; set; }
         public string origin { get; set; }
         public string senderId { get; set; }
+        public string messageId { get; set; }
     }
 
     /// <summary>
@@ -22,11 +23,9 @@ namespace Sancho.Web
 
     public class ProtocolHub : Hub
     {
-        // Clients.All.SendAsync("broadcastMessage", name, message);
-
         public void Send(Message message)
         {
-            Clients.All.SendAsync("receive", message);
+            Clients.Others.SendAsync("receive", message);
         }
     }
 }

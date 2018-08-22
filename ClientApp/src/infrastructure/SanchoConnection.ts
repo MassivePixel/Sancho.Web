@@ -6,6 +6,8 @@ export type Message = {
   metadata: {
     pluginId: string;
     origin: 'server' | 'client';
+    messageId?: string;
+    senderId: string;
   };
 };
 
@@ -19,6 +21,8 @@ export class SanchoConnection {
   id: string;
   isConnected: boolean;
 
+  queries = new Map<string, (m: Message) => any>();
+
   stateChangedListeners: ((status: ConnectionStatus) => void)[] = [];
   messageListeners = new Map<string, ((m: Message) => any)[]>();
 
@@ -28,7 +32,7 @@ export class SanchoConnection {
       .build();
     this.id = '1';
     this.isConnected = false;
-    this.connection.on('receive', this._handleReceive);
+    this.connection.on('receive', this.handleReceive);
   }
 
   connect = () => {
@@ -40,11 +44,7 @@ export class SanchoConnection {
     return t;
   };
 
-  send = (
-    pluginId: string,
-    command: string,
-    data: null | object | string = null
-  ) => {
+  send = (pluginId: string, command: string, data: any | null = null) => {
     this.connection.send('send', <Message>{
       command,
       data,
@@ -56,11 +56,34 @@ export class SanchoConnection {
     });
   };
 
+  sendQuery = (pluginId: string, command: string, data: any | null = null) =>
+    new Promise<Message>((resolve: (m: Message) => any) => {
+      const messageId = getNextMessageId();
+      const m: Message = {
+        command,
+        data,
+        metadata: {
+          pluginId,
+          messageId,
+          origin: 'server',
+          senderId: this.id,
+        },
+      };
+      this.connection.send('send', m);
+
+      this.queries.set(messageId, resolve);
+    });
+
   addStateChangedListener(callback: (status: ConnectionStatus) => void) {
     this.stateChangedListeners.push(callback);
   }
 
-  removeStateChangedListener(callback: (status: ConnectionStatus) => void) {}
+  removeStateChangedListener(callback: (status: ConnectionStatus) => void) {
+    const index = this.stateChangedListeners.indexOf(callback);
+    if (index !== -1) {
+      this.stateChangedListeners.splice(index);
+    }
+  }
 
   addListener = (pluginId: string, callback: (m: Message) => any) => {
     if (!this.messageListeners.has(pluginId)) {
@@ -70,15 +93,45 @@ export class SanchoConnection {
     this.messageListeners.get(pluginId)!.push(callback);
   };
 
-  removeListener = (pluginId: string, callback: (m: Message) => any) => {};
+  removeListener = (pluginId: string, callback: (m: Message) => any) => {
+    if (!this.messageListeners.has(pluginId)) {
+      return;
+    }
 
-  _handleReceive = (message: Message) => {
+    const plugins = this.messageListeners.get(pluginId);
+    const index = plugins!.indexOf(callback);
+    if (index !== -1) {
+      plugins!.splice(index);
+    }
+  };
+
+  handleReceive = (message: Message) => {
     const listeners = this.messageListeners.get(message.metadata.pluginId);
+
+    console.dir(message);
+
+    // resolve queries
+    if (message.metadata.messageId && message.metadata.origin !== 'server') {
+      const query = this.queries.get(message.metadata.messageId);
+      if (query) {
+        query(message);
+        this.queries.delete(message.metadata.messageId);
+      }
+    }
 
     if (listeners && listeners.length) {
       listeners.forEach(listener => listener(message));
       return true;
     }
+
     return false;
   };
+}
+
+// rough implementation
+let messageId = 1;
+
+function getNextMessageId() {
+  // tslint:disable-next-line:no-increment-decrement
+  return (messageId++).toString();
 }

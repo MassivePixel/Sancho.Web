@@ -1,6 +1,8 @@
 import React from 'react';
 import EchoPlugin from './plugins/EchoPlugin';
 import { SanchoConnection } from '../infrastructure/SanchoConnection';
+import AsyncCommand from './plugins/AsyncCommand';
+import JintPlugin from './plugins/JintPlugin';
 
 class State {
   isConnected = false;
@@ -27,6 +29,8 @@ class Home extends React.Component<{}, State> {
         </nav>
 
         <EchoPlugin connection={this.connection} />
+        <JintPlugin connection={this.connection} />
+        <AsyncCommand connection={this.connection} />
       </div>
     );
   }
