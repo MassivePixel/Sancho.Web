@@ -106,12 +106,17 @@ export class SanchoConnection {
   };
 
   handleReceive = (message: Message) => {
+    if (message.metadata.origin === 'server') {
+      // for now drop all server messages immediately
+      return;
+    }
+
     const listeners = this.messageListeners.get(message.metadata.pluginId);
 
     console.dir(message);
 
-    // resolve queries
-    if (message.metadata.messageId && message.metadata.origin !== 'server') {
+    if (message.metadata.messageId) {
+      // resolve queries
       const query = this.queries.get(message.metadata.messageId);
       if (query) {
         query(message);
