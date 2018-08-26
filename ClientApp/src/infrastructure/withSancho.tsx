@@ -9,12 +9,15 @@ class State {
   connectionStatus = ConnectionStatus.Disconnected;
 }
 
-export const withSancho = (Component: any) => {
-  return class extends React.Component<Props, State> {
+export function withSancho<T>(Component: any) {
+  return class extends React.Component<Props & T, State> {
     state = new State();
 
     componentDidMount() {
       this.props.connection.addStateChangedListener(this.handleStateChanged);
+      if (this.props.connection.isConnected) {
+        this.setState({ connectionStatus: ConnectionStatus.Connected });
+      }
     }
 
     componentWillUnmount() {
@@ -34,4 +37,4 @@ export const withSancho = (Component: any) => {
     handleStateChanged = (connectionStatus: ConnectionStatus) =>
       this.setState({ connectionStatus });
   };
-};
+}

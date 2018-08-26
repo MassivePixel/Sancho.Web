@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import { SanchoConnection, withSancho, Message } from '../../infrastructure';
 
 type Props = {
+  connectionId: string;
   connection: SanchoConnection;
   isEnabled: boolean;
 };
@@ -67,4 +68,4 @@ class EchoPlugin extends PureComponent<Props, State> {
   };
 }
 
-export default withSancho(EchoPlugin);
+export default withSancho<Partial<Props>>(EchoPlugin);
